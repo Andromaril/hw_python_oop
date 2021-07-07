@@ -97,8 +97,8 @@ class CashCalculator(Calculator):
 
         cash_rate = CashCalculator.currency_dict[value][0]
         cash_name = CashCalculator.currency_dict[value][1]
-        self_limit_rate = self.limit/cash_rate
-        get_today_rate = Calculator.get_today_stats(self)/cash_rate
+        self_limit_rate = self.limit / cash_rate
+        get_today_rate = Calculator.get_today_stats(self) / cash_rate
         cash_balance = round((self_limit_rate - get_today_rate), 2)
         module_cash_balance = abs(cash_balance)
 
