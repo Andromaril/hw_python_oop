@@ -39,7 +39,7 @@ class Calculator:
                     in self.records if today >= record.date > date_week])
 
     def get_remained(self) -> int:
-        
+
         difference = self.limit - self.get_today_stats()
         return difference
 
