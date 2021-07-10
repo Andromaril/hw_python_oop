@@ -1,6 +1,6 @@
 import datetime as dt
 from datetime import date
-from typing import Union
+from typing import Union, Optional
 
 
 class Calculator:
@@ -9,7 +9,9 @@ class Calculator:
        о потраченных суммах и съеденных калориях
        за конкретные даты, класс также содержит
        дневной лимит калорий и денег."""
+    today = date.today()
     delta_time = dt.timedelta(days=7)
+    date_week = today - delta_time
 
     def __init__(self, limit: Union[int, float]) -> None:
         """Конструктор класса Calculator."""
@@ -32,23 +34,20 @@ class Calculator:
     def get_week_stats(self) -> int:
         """Суммирует записи о калориях и деньгах за последние 7 дней."""
 
-        today = date.today()
-        date_week = today - Calculator.delta_time
-
         return sum([record.amount for record
-                    in self.records if today >= record.date > date_week])
+                    in self.records if
+                    Calculator.today >= record.date > Calculator.date_week])
 
     def get_remained(self) -> int:
 
-        difference = self.limit - self.get_today_stats()
-        return difference
+        return self.limit - self.get_today_stats()
 
 
 class Record:
     """Класс Record. Отдельный класс для удобства создания записей."""
 
     def __init__(self, amount: Union[int, float],
-                 comment: str, date=None) -> None:
+                 comment: str, date: Optional[str] = None) -> None:
         """Конструктор класса Record. Содержит условия для даты."""
 
         self.amount = amount
@@ -86,22 +85,24 @@ class CashCalculator(Calculator):
     USD_RATE = 60.00
     EURO_RATE = 70.00
 
-    cur_t = ({'usd': [USD_RATE, 'USD'],
-              'eur': [EURO_RATE, 'Euro'],
-              'rub': [1, 'руб']})
+    cur_t = {'usd': (USD_RATE, 'USD'),
+             'eur': (EURO_RATE, 'Euro'),
+             'rub': (1, 'руб')}
 
     def get_today_cash_remained(self, val: Union[float, str]) -> str:
         """Считает сколько потраченно денег за день,
            сравнивает с лимитом на день."""
-
-        name, rate = CashCalculator.cur_t[val][1], CashCalculator.cur_t[val][0]
-
-        if self.get_remained() == 0:
-            return 'Денег нет, держись'
+        try:
+            rate, name = CashCalculator.cur_t[val]
+        except KeyError:
+            return 'Валюта недоступна, принимаемые валюты - usd, rub, euro'
         else:
-            get_today_rate = self.get_remained() / rate
-            cash_balance = round(get_today_rate, 2)
-            module_cash_balance = abs(cash_balance)
+            if self.get_remained() == 0:
+                return 'Денег нет, держись'
+            else:
+                get_today_rate = self.get_remained() / rate
+                cash_balance = round(get_today_rate, 2)
+                module_cash_balance = abs(cash_balance)
             if cash_balance > 0:
                 return f'На сегодня осталось {cash_balance} {name}'
             else:
